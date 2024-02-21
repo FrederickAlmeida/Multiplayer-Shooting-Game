@@ -5,12 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
-
     [SerializeField] private string _gameScene;
 
     public void StartGame()
     {
-        SceneManager.LoadScene(_gameScene);
+        // Load the Loading scene
+        SceneManager.LoadScene("Loading");
+
+        // If you need to store the target game scene name for later use in the Loading scene,
+        // you can set it here. For instance, using PlayerPrefs or a static variable.
     }
 
     public void QuitGame()
@@ -19,3 +22,4 @@ public class MainMenuManager : MonoBehaviour
         Application.Quit();
     }
 }
+

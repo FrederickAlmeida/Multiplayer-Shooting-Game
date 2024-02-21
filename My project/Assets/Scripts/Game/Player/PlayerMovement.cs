@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Photon.Pun;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -18,16 +19,23 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float _screenBorder;
 
+    private PhotonView _photonView;
+
     private void Awake() {
         _rigidbody = GetComponent<Rigidbody2D>();
         _camera = Camera.main;
+        _photonView = GetComponent<PhotonView>();
     }
 
     // updated every frame
     private void FixedUpdate()
     {
-        SetPlayerVelocity();
-        RotateInDirectionOfInput();
+        // Only control the player if it's the local player's character
+        if (_photonView.IsMine)
+        {
+            SetPlayerVelocity();
+            RotateInDirectionOfInput();
+        }
     }
 
     private void SetPlayerVelocity()
@@ -42,28 +50,31 @@ public class PlayerMovement : MonoBehaviour
     private void PreventPlayerGoingOffScreen() {
         Vector2 screenPosition = _camera.WorldToScreenPoint(transform.position);
 
-        if ((screenPosition.x <= _screenBorder && _rigidbody.velocity.x < 0) || screenPosition.x >= _camera.pixelWidth - _screenBorder && _rigidbody.velocity.x > 0) {
+        if ((screenPosition.x <= _screenBorder && _rigidbody.velocity.x < 0) || (screenPosition.x >= _camera.pixelWidth - _screenBorder && _rigidbody.velocity.x > 0)) {
             _rigidbody.velocity = new Vector2(0, _rigidbody.velocity.y);
         }
 
-        if ((screenPosition.y <= _screenBorder && _rigidbody.velocity.y < 0) || screenPosition.y > _camera.pixelHeight - _screenBorder && _rigidbody.velocity.y > 0) {
+        if ((screenPosition.y <= _screenBorder && _rigidbody.velocity.y < 0) || (screenPosition.y >= _camera.pixelHeight - _screenBorder && _rigidbody.velocity.y > 0)) {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
         }
     }
 
     // updates whenever the player object moves
     private void OnMove(InputValue inputValue) {
-        _movementInput = inputValue.Get<Vector2>();
+        // Only process input if it's the local player's character
+        if (_photonView.IsMine)
+        {
+            _movementInput = inputValue.Get<Vector2>();
+        }
     }
     
     private void RotateInDirectionOfInput() {
         // check if the player is moving
         if (_movementInput != Vector2.zero) {
-            Quaternion targetRotation = Quaternion.LookRotation(transform.forward, _smoothedMovementInput);
+            Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, _smoothedMovementInput);
             Quaternion rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
 
             _rigidbody.MoveRotation(rotation);
         }
     }
-    
 }
