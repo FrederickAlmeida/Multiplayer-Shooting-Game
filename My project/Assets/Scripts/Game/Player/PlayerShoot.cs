@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class PlayerShoot : MonoBehaviour
 {
@@ -37,11 +39,13 @@ public class PlayerShoot : MonoBehaviour
 
     }
 
-    private void FireBullet() {
-        GameObject bullet = Instantiate(_bulletPrefab, _gunOffset.position, transform.rotation);
+    private void FireBullet()
+    {
+        // Instantiate the bullet over the network so that it is synchronized across clients
+        GameObject bullet = PhotonNetwork.Instantiate(_bulletPrefab.name, _gunOffset.position, transform.rotation);
 
         Rigidbody2D rigidbody = bullet.GetComponent<Rigidbody2D>();
-
         rigidbody.velocity = _bulletSpeed * transform.up;
     }
+
 }
