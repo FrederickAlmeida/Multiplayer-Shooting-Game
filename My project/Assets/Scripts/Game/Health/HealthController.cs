@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Photon.Pun;
 
 public class HealthController : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class HealthController : MonoBehaviour
 
     public void TakeDamage(float damageAmount) {
         if (_currentHealth == 0) {
-            return;
+            PhotonNetwork.Destroy(this.gameObject);
         }
 
         if (!IsInvincible) {
